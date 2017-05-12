@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -51,13 +52,34 @@ func (g *Gourmet) genTemplate(w http.ResponseWriter, r *http.Request, file strin
 	t.ExecuteTemplate(w, "layout", data)
 
 }
+func (g *Gourmet) toolbox() []map[string]interface{} {
+
+	data := []map[string]interface{}{
+		{"Name": "Add", "Icon": "plus-sign", "Func": "tfAdd"},
+		{"Name": "Del", "Icon": "minus-sign", "Func": "tfDel"},
+		{"Name": "Magnet", "Icon": "magnet", "Func": "tfMagnet"},
+		{"Sep": true},
+		{"Name": "Start", "Icon": "play", "Func": "tfStart"},
+		{"Name": "Stop", "Icon": "stop", "Func": "tfStop"},
+		{"Sep": true},
+	}
+	return data
+}
 
 func (g *Gourmet) navbar(active string) []map[string]interface{} {
 
 	data := []map[string]interface{}{
-		{"Name": "List", "Href": "/", "Class": eq("list", active, "active", "")},
+		{"Name": "List", "Href": "/", "Class": eq("torrents", active, "active", "")},
 		{"Name": "Config", "Href": "/config", "Class": eq("config", active, "active", "")},
+		{"Name": "File manager", "Href": "/fileman", "Class": eq("fileman", active, "active", "")},
 	}
 
 	return data
+}
+
+func (g *Gourmet) footer() map[string]interface{} {
+	return map[string]interface{}{
+		"UL": rand.Intn(2500),
+		"DL": rand.Intn(6500),
+	}
 }

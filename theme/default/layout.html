@@ -15,11 +15,21 @@
 	{{ template "navbar" . }}
 	<div class="container-fluid">
 	      <div class="row">
-			  {{ template "sidebar" . }}
 			  {{ template "content" . }}
+			  {{ template "sidebar" . }}
+
 		  </div>
 		</div>
 	</div>
+	<footer class="footer">
+      <div class="container">
+        <ul class="list-inline">
+			<li><span class="glyphicon glyphicon-cloud-upload"></span> {{ .Footer.UL }} KB/s</li>
+			<li><span class="glyphicon glyphicon-cloud-download"></span> {{ .Footer.DL }} KB/s</li>
+		</ul>
+      </div>
+    </footer>
+
     <script src="/static/bootstrap/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/static/bootstrap/js/j.dt.min.js"></script>

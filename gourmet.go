@@ -81,17 +81,21 @@ func (g *Gourmet) Start() {
 func (g *Gourmet) listPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	g.genTemplate(w, r, "list.html", map[string]interface{}{
 		"Config":  g.Config,
-		"Navbar":  g.navbar("list"),
+		"Navbar":  g.navbar("torrents"),
+		"Toolbox": g.toolbox(),
 		"Title":   "torrent",
 		"Content": "",
+		"Footer":  g.footer(),
 	})
 }
 func (g *Gourmet) configPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	g.genTemplate(w, r, "config.html", map[string]interface{}{
 		"Config":  g.Config,
 		"Navbar":  g.navbar("config"),
+		"Toolbox": g.toolbox(),
 		"Title":   "torrent",
 		"Content": "",
+		"Footer":  g.footer(),
 	})
 }
 
