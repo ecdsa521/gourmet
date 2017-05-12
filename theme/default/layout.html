@@ -1,0 +1,31 @@
+{{ define "layout" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ .Title }}</title>
+
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/bootstrap/css/dt.min.css" rel="stylesheet">
+	<link href="/static/theme/{{ .Config.Theme }}/theme.css" rel="stylesheet">
+  </head>
+  <body>
+
+	{{ template "navbar" . }}
+	<div class="container">
+		<div class="content-start">
+			{{ template "content" . }}
+		</div>
+	</div>
+    <script src="/static/bootstrap/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/static/bootstrap/js/j.dt.min.js"></script>
+	<script src="/static/bootstrap/js/b.dt.min.js"></script>
+	<script src="/static/app.js"></script>
+  </body>
+</html>
+
+
+{{ end }}

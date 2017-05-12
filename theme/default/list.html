@@ -1,0 +1,31 @@
+{{ define "content" }}
+	<div class="content">
+		<button onclick="loadData()">Load fake data</button>
+		<table class="table table-striped" id="list">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Path</th>
+					<th>Hash</th>
+					<th>Size</th>
+					<th>Done</th>
+					<th>Seeds</th>
+					<th>Peers</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .List }}
+				<tr>
+					<td>{{ .Name }}</td>
+					<td>{{ .Path }}</td>
+					<td>{{ .Hash }}</td>
+					<td>{{ .Size }}</td>
+					<td>{{ .Done }}</td>
+					<td>{{ .Seeds }}</td>
+					<td>{{ .Peers }}</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+{{ end }}
