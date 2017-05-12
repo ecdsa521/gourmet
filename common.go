@@ -41,6 +41,7 @@ func (g *Gourmet) genTemplate(w http.ResponseWriter, r *http.Request, file strin
 	files := []string{
 		fmt.Sprintf("theme/%s/layout.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/navbar.html", g.Config["Theme"]),
+		fmt.Sprintf("theme/%s/sidebar.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/%s", g.Config["Theme"], file),
 	}
 

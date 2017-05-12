@@ -45,12 +45,16 @@ func (g *Gourmet) fakeList(num int) []GEntry {
 
 	data := []GEntry{}
 	for i := 0; i <= num; i++ {
+		seeds, peers, size, done := rand.Intn(500), rand.Intn(500), rand.Intn(50000), rand.Intn(50000)
+		if done > size {
+			done = size / (rand.Intn(4) + 1)
+		}
 		data = append(data, GEntry{
 			Name:  g.fakeName(),
-			Size:  rand.Intn(1000000),
-			Done:  rand.Intn(1000000),
-			Seeds: rand.Intn(500),
-			Peers: rand.Intn(500),
+			Size:  size,
+			Done:  done,
+			Seeds: seeds,
+			Peers: peers,
 			Hash:  fmt.Sprintf("%x", sha1.Sum([]byte(g.fakeName()))),
 			Path:  "C:/Windows/system32/" + g.fakeName(),
 		})
@@ -78,16 +82,16 @@ func (g *Gourmet) listPage(w http.ResponseWriter, r *http.Request, ps httprouter
 	g.genTemplate(w, r, "list.html", map[string]interface{}{
 		"Config":  g.Config,
 		"Navbar":  g.navbar("list"),
-		"Title":   "some title",
-		"Content": "some content",
+		"Title":   "torrent",
+		"Content": "",
 	})
 }
 func (g *Gourmet) configPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	g.genTemplate(w, r, "config.html", map[string]interface{}{
 		"Config":  g.Config,
 		"Navbar":  g.navbar("config"),
-		"Title":   "some title",
-		"Content": "some content",
+		"Title":   "torrent",
+		"Content": "",
 	})
 }
 

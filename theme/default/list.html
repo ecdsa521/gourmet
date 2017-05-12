@@ -1,5 +1,5 @@
 {{ define "content" }}
-	<div class="content">
+	<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 		<button onclick="loadData()">Load fake data</button>
 		<table class="table table-striped" id="list">
 			<thead>
@@ -14,17 +14,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{{ range .List }}
-				<tr>
-					<td>{{ .Name }}</td>
-					<td>{{ .Path }}</td>
-					<td>{{ .Hash }}</td>
-					<td>{{ .Size }}</td>
-					<td>{{ .Done }}</td>
-					<td>{{ .Seeds }}</td>
-					<td>{{ .Peers }}</td>
-				</tr>
-				{{ end }}
+
 			</tbody>
 		</table>
 	</div>
