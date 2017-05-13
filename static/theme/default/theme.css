@@ -86,6 +86,7 @@ body {
 }
 .progress {
 	margin: 0px;
+	margin-top: 3px;
 	padding: 0px;
 }
 .footer {
@@ -139,4 +140,15 @@ tr.selected .details {
 }
 tr.selected {
 	background: #eee;
+
+}
+.label-badge {
+    border-radius: 1em;
+}
+.label-silver {
+	background: #ddd;
+	color: #555;
+}
+.select-info {
+	display: block;
 }
