@@ -131,3 +131,12 @@ body {
 
 	margin-left: 0px !important;
 }
+tr .details {
+	display: none;
+}
+tr.selected .details {
+	display: block;
+}
+tr.selected {
+	background: #eee;
+}

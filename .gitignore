@@ -2,7 +2,8 @@
 *.o
 *.a
 *.so
-
+*.iso
+*.db
 # Folders
 _obj
 _test

@@ -6,15 +6,18 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/anacrolix/torrent"
 	"github.com/julienschmidt/httprouter"
 	"github.com/russross/blackfriday"
 )
 
 //Gourmet ...
 type Gourmet struct {
-	Config    map[string]interface{}
-	router    *httprouter.Router
-	_wordlist []string
+	Config       map[string]interface{}
+	Client       *torrent.Client
+	ClientConfig *torrent.Config
+	router       *httprouter.Router
+	_wordlist    []string
 }
 
 func eq(d1 interface{}, d2 interface{}, s string, e string) string {
@@ -43,6 +46,7 @@ func (g *Gourmet) genTemplate(w http.ResponseWriter, r *http.Request, file strin
 		fmt.Sprintf("theme/%s/layout.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/navbar.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/sidebar.html", g.Config["Theme"]),
+		fmt.Sprintf("theme/%s/modals.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/%s", g.Config["Theme"], file),
 	}
 
