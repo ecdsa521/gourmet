@@ -11,9 +11,13 @@
       <div class="modal-body">
 		  <form action="/api/add/magnet" target="hidf">
             <div class="form-group">
-              <label for="recipient-name" class="control-label">Magnet:</label>
+				<label for="autostart" class="pull-right">
+				  <input name="autostart" id="autostart" type="checkbox"> Start when added
+				</label>
+              <label for="magnet-link" class="control-label">Magnet:</label>
               <input type="text" class="form-control" id="magnet-link" name="magnet">
             </div>
+
           </form>
       </div>
       <div class="modal-footer">
@@ -23,5 +27,34 @@
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="modalAddLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modalAdd">Add Torrents</h4>
+      </div>
+      <div class="modal-body">
+		  <form action="/api/add/torrent" target="hidf">
+            <div class="form-group">
+				<label for="autostart" class="pull-right">
+				  <input name="autostart" id="autostart" type="checkbox"> Start when added
+				</label>
+              <label for="magnet-link2" class="control-label">Magnet:</label>
+              <input type="text" class="form-control" id="magnet-link2" name="magnet">
+            </div>
+
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary submit">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {{ end }}

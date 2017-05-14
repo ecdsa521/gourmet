@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
+	"github.com/ecdsa521/torrent"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -26,6 +26,7 @@ func (g *Gourmet) apiStats(w http.ResponseWriter, r *http.Request, ps httprouter
 	stats["DL"] = int(totalSpeed["DL"])
 	stats["Peers"] = 0
 	stats["Seeds"] = 0
+
 	for _, v := range g.Client.Torrents() {
 		stats["Peers"] += v.Stats().TotalPeers
 		stats["Seeds"] += v.Stats().ActivePeers
@@ -75,9 +76,9 @@ func (g *Gourmet) apiStopDL(w http.ResponseWriter, r *http.Request, ps httproute
 		t, succ := g.getTorrent(r.FormValue("hash"))
 		if succ {
 			<-t.GotInfo()
-			t.Announce()
+			//t.Announce()
 			t.Close()
-
+			t.SetStatus("Stopped")
 		}
 	}()
 
@@ -96,7 +97,7 @@ func (g *Gourmet) apiStartDL(w http.ResponseWriter, r *http.Request, ps httprout
 
 			t.Reopen()
 			t.DownloadAll()
-
+			t.SetStatus("Started")
 		}
 	}()
 
@@ -115,7 +116,17 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 		g.speedCalcDL(v)
 		g.speedCalcUL(v)
 		if v.Info() != nil {
-
+			//	fmt.Printf("%s: %v\n", v.InfoHash().HexString(), v.Activity())
+			s := v.Activity()
+			if s["closed"] {
+				v.SetStatus("Stopped")
+			}
+			if s["seeding"] {
+				v.SetStatus("Seeding")
+			}
+			if s["needData"] {
+				v.SetStatus("Downloading")
+			}
 			data = append(data, GEntry{
 				Name:     v.Name(),
 				Hash:     v.InfoHash().HexString(),
@@ -125,6 +136,8 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 				Seeds:    v.Stats().ActivePeers,
 				Uploaded: v.Stats().BytesWritten,
 				Trackers: v.Metainfo().AnnounceList,
+				Status:   v.Status,
+				Activity: v.Activity(),
 				UL:       ulSpeedCalc[hex].lastSpeed,
 				DL:       dlSpeedCalc[hex].lastSpeed,
 			})
@@ -138,7 +151,18 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 func (g *Gourmet) apiAddMagnet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 
-	g.Client.AddMagnet(r.FormValue("magnet"))
+	t, err := g.Client.AddMagnet(r.FormValue("magnet"))
+	if err == nil {
+		if r.FormValue("autostart") == "on" {
+			<-t.GotInfo()
+			t.Reopen()
+			t.DownloadAll()
+			t.SetStatus("Downloading")
+
+		} else {
+			t.SetStatus("Stopped")
+		}
+	}
 	fmt.Printf("Adding magnet: %s\n", r.FormValue("magnet"))
 	b, _ := json.Marshal(fmt.Sprintf("ok: %d", len(g.Client.Torrents())))
 	w.Header().Add("Content-Type", "application/json")

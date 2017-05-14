@@ -11,7 +11,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/anacrolix/torrent"
+	"github.com/ecdsa521/torrent"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -37,6 +37,8 @@ type GEntry struct {
 	UL       int64
 	DL       int64
 	Uploaded int64
+	Status   string
+	Activity map[string]bool
 	Files    []*torrent.File
 	PeerList []*torrent.Peer
 	Trackers [][]string

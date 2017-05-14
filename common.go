@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/anacrolix/torrent"
+	"github.com/ecdsa521/torrent"
 	"github.com/julienschmidt/httprouter"
 	"github.com/russross/blackfriday"
 )

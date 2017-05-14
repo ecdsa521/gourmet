@@ -34,22 +34,42 @@ var loadData = function() {
 
 	var nameRender = function(data, type, row, meta) {
 		percent = Math.round((row['Done'] * 100) / row['Size']);
-
+		//console.log(row["Activity"]);
 		var data = row['Name'];
+
 		data += '<div class="pull-right clear">';
-		data += '<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-upload"></span> ' + row['UL'].fileSize(1) + '/s</span> ';
-		data += '<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-download"></span> ' + row['DL'].fileSize(1) + '/s</span> ';
-		data += '<span class="label label-badge label-success">' + row['Seeds'] + ' seeds</span> ';
-		data += '<span class="label label-badge label-primary">' + row['Peers'] + ' peers</span> ';
-		data += '<span class="label label-badge label-warning">' + row['Done'].fileSize(1) + ' done</span> ';
-		data += '<span class="label label-badge label-warning">' + row['Uploaded'].fileSize(1) + ' uploaded</span> ';
 
-		data += '<span  onclick="announce(\'' + row["Hash"] + '\');" class="btn btn-danger btn-xs glyphicon glyphicon-refresh"></span> ';
-		data += '</div><br style="clear: both;" />';
+		switch (row['Status']) {
+			case "Seeding":
+			data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Seeding: ' + row['Uploaded'].fileSize(1) + '</span><div role="progressbar" class="progress-bar progress-bar-success progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				break
+			case "Downloading":
+				//data += '<span class="label label-badge label-primary">Downloading: ' + percent + '%</span> ';
+				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Downloading: ' + row['Done'].fileSize(1) + ' (' + percent + '%)</span><div role="progressbar" class="progress-bar progress-bar-primary progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				break
+			case "Stopped":
+				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Stopped: ' + row['Done'].fileSize(1) + ' (' + percent + '%)</span><div role="progressbar" class="progress-bar progress-bar-warning progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
 
-		data += '<div class="pull-left">';
+				//data += '<span class="label label-badge label-warning">Stopped</span> ';
+				break
+			case "Error":
+				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Error</span><div role="progressbar" class="progress-bar progress-bar-danger progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				break
+			default:
+			data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">' + row["Status"] + '</span><div role="progressbar" class="progress-bar progress-bar-danger progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+		}
+		data += '<span class=" label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-upload"></span> ' + row['UL'].fileSize(1) + '/s</span> ';
+		data += '<span class=" label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-download"></span> ' + row['DL'].fileSize(1) + '/s</span> ';
+
+		data += '<br style="clear: both;" />';
+		data += "</div>";
+
+
+
+		//data += '<span  onclick="announce(\'' + row["Hash"] + '\');" class="btn btn-danger btn-xs glyphicon glyphicon-refresh"></span> ';
+
+
 		data += '</div>';
-		data += '<div class="progress"><div role="progressbar" class="progress-bar progress-bar-success progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="min-width: 32px; width:' + percent + '%">' + percent + '%</div></div>';
 
 		return data;
 
@@ -57,7 +77,7 @@ var loadData = function() {
 	tTable = $('#list').dataTable( {
 		"ajax": "/api/list",
 		"sAjaxDataProp": "",
-		"sDom": 'lrtip',
+		"sDom": '<"pull-left" i><"pull-right" l><t><"center" p>',
 		"select": true,
 		"rowId": 'Hash',
 		"autoWidth": false,
@@ -99,11 +119,29 @@ $("#tfStart").click(function() {
 
 	return false;
 });
+$("#tfDel").click(function() {
+	var data = tTable.DataTable().rows( { selected: true } ).data();
+	$(data).each(function(x) {
+		$.ajax("/api/remove?hash=" + data[x]["Hash"])
+	})
+
+	return false;
+});
 $("#tfStop").click(function() {
 	var data = tTable.DataTable().rows( { selected: true } ).data();
 	$(data).each(function(x) {
 		$.ajax("/api/stop?hash=" + data[x]["Hash"])
 	})
+
+	return false;
+});
+
+$("#tfAdd").click(function() {
+	$("#modalAdd").modal();
+	$("#modalAdd .submit").click(function() {
+		$("#modalAdd form").submit();
+		$("#modalAdd").modal('hide');
+	});
 
 	return false;
 });

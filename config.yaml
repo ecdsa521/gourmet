@@ -2,3 +2,4 @@ Port: 1666
 UL: 0
 DL: 0
 Theme: default
+Autostart: 1 #0: all torrents stopped; 1: all torrents only seed, don't download; 2: all torrents fully started

@@ -41,12 +41,12 @@ body {
   background-color: #428bca;
 }
 .main {
-  padding: 20px;
+  padding: 10px;
   margin-left: 5px;
 }
 @media (min-width: 768px) {
   .main {
-    padding-right: 0px;
+    padding-right: 10px;
     padding-left: 1px;
   }
 }
@@ -82,12 +82,46 @@ body {
 }
 .table {
 	width: 100%;
+	padding-top: 10px;
 	padding-left: 0px;
 }
+
 .progress {
 	margin: 0px;
 	margin-top: 3px;
 	padding: 0px;
+
+}
+.label-badge {
+    border-radius: 1em;
+	min-width: 100px;
+	display: inline-block;
+}
+.label-silver {
+	background: #ddd;
+	color: #555;
+}
+.font-10x {
+	font-size: 10.5px;
+}
+.progress-badge {
+	float: left;
+	width: 200px;
+	margin-right: 5px;
+	height: 16px;
+	position: relative;
+	background: #888;
+}
+.progress-center {
+	position: absolute;
+	z-index: 99999;
+	left: 0px;
+	top: 0px;
+	display: block;
+	width: 100%;
+	font-size: 10.5px;
+	text-align: center;
+
 }
 .footer {
   position: fixed;
@@ -137,18 +171,22 @@ tr .details {
 }
 tr.selected .details {
 	display: block;
+
 }
 tr.selected {
 	background: #eee;
 
 }
-.label-badge {
-    border-radius: 1em;
-}
-.label-silver {
-	background: #ddd;
-	color: #555;
-}
+
 .select-info {
-	display: block;
+	margin-left: 5px;
+}
+.select-info::before {
+	content: ' ... ';
+}
+.center {
+	text-align: center;
+}
+td {
+	padding-right: 0px !important;
 }
