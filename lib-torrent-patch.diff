@@ -1,11 +1,19 @@
 diff --git a/torrent.go b/torrent.go
-index 4d36209..4991573 100644
+index 4d36209..d8802cd 100644
 --- a/torrent.go
 +++ b/torrent.go
-@@ -544,7 +544,33 @@ func (t *Torrent) numPieces() int {
+@@ -544,7 +544,41 @@ func (t *Torrent) numPieces() int {
  func (t *Torrent) numPiecesCompleted() (num int) {
  	return t.completedPieces.Len()
  }
++func (t *Torrent) Announce() {
++	t.wantPeersEvent.Set()
++	t.announceDHT(true)
++	t.startMissingTrackerScrapers()
++	cl := t.cl
++	cl.event.Broadcast()
++	cl.openNewConns(t)
++}
 +func (t *Torrent) Reopen() {
 +	t.closed.SetBool(false)
 +	t.closed.Clear()
