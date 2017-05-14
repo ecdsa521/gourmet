@@ -1,5 +1,7 @@
 # gourmet
-For now requires patching the [torrent](https://github.com/anacrolix/torrent) lib with `lib-torrent-patch.diff` because the lib does not support stopping torrents by default.
+For now you need my ugly fork of torrent lib. 
 
-Good fucking luck.
+    go get -u github.com/ecdsa521/torrent
+    go get -u github.com/ecdsa521/gourmet
+
 
