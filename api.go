@@ -110,7 +110,7 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 
 	//	list := g.fakeList(1000)
 	data := []GEntry{}
-	//data := g.fakeList(50000)
+	//data := g.fakeList(5000)
 	for _, v := range g.Client.Torrents() {
 		var hex string = v.InfoHash().HexString()
 		g.speedCalcDL(v)

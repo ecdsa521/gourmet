@@ -61,9 +61,9 @@ func (g *Gourmet) fakeList(num int) []GEntry {
 
 	data := []GEntry{}
 	for i := 0; i <= num; i++ {
-		seeds, peers, size, done := rand.Intn(500), rand.Intn(500), rand.Intn(50000), rand.Intn(50000)
+		seeds, peers, size, done := rand.Intn(500), rand.Intn(500), rand.Int63n(50000), rand.Int63n(50000)
 		if done > size {
-			done = size / (rand.Intn(4) + 1)
+			done = size / (rand.Int63n(4) + 1)
 		}
 		data = append(data, GEntry{
 			Name:  g.fakeName(),
