@@ -1,0 +1,10 @@
+{{ define "footer" }}
+<footer class="footer">
+  <div class="container">
+	<ul class="list-inline">
+		<li><span class="glyphicon glyphicon-cloud-upload"></span> <span id="totalUL">{{ .Footer.UL }} KB/s</span></li>
+		<li><span class="glyphicon glyphicon-cloud-download"></span> <span id="totalDL">{{ .Footer.DL }} KB/s</span></li>
+	</ul>
+  </div>
+</footer>
+{{ end }}

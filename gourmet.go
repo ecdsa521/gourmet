@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -14,7 +12,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/anacrolix/torrent"
-	"github.com/anacrolix/torrent/metainfo"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -40,8 +37,9 @@ type GEntry struct {
 	UL       int64
 	DL       int64
 	Uploaded int64
-	Files    []GFile
-	Trackers []string
+	Files    []*torrent.File
+	PeerList []*torrent.Peer
+	Trackers [][]string
 }
 
 type speed struct {
@@ -52,6 +50,7 @@ type speed struct {
 
 var ulSpeedCalc map[string]speed
 var dlSpeedCalc map[string]speed
+var totalSpeed map[string]int64
 
 /*
 func (g *Gourmet) fakeList(num int) []GEntry {
@@ -92,6 +91,8 @@ func (g *Gourmet) Start() {
 	g.router.GET("/api/start", g.apiStartDL)
 	g.router.GET("/api/stop", g.apiStopDL)
 	g.router.GET("/api/remove", g.apiRemove)
+	g.router.GET("/api/stats", g.apiStats)
+	g.router.GET("/api/announce", g.apiAnnounce)
 	g.router.GET("/api/add/magnet", g.apiAddMagnet)
 	g.router.ServeFiles("/static/*filepath", http.Dir("static"))
 	http.ListenAndServe(fmt.Sprintf(":%d", g.Config["Port"]), g.router)
@@ -117,81 +118,19 @@ func (g *Gourmet) configPage(w http.ResponseWriter, r *http.Request, ps httprout
 		"Footer":  g.footer(),
 	})
 }
-func (g *Gourmet) apiAddMagnet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
 
-	g.Client.AddMagnet(r.FormValue("magnet"))
-	fmt.Printf("Adding magnet: %s\n", r.FormValue("magnet"))
-	b, _ := json.Marshal(fmt.Sprintf("ok: %d", len(g.Client.Torrents())))
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
-}
-func (g *Gourmet) getTorrent(hash string) (*torrent.Torrent, bool) {
-
-	var ih metainfo.Hash
-	hex.Decode(ih[:], []byte(hash))
-
-	return g.Client.Torrent(ih)
-
-}
-func (g *Gourmet) apiRemove(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
-	go func() {
-		fmt.Printf("Want to remove %s\n", r.FormValue("hash"))
-		t, succ := g.getTorrent(r.FormValue("hash"))
-		if succ {
-			<-t.GotInfo()
-			t.Drop()
-		}
-	}()
-
-	b, _ := json.Marshal("ok: " + ps.ByName("hash"))
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
-}
-func (g *Gourmet) apiStopDL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
-	go func() {
-		fmt.Printf("Want to stop %s\n", r.FormValue("hash"))
-		t, succ := g.getTorrent(r.FormValue("hash"))
-		if succ {
-			<-t.GotInfo()
-			t.Close()
-		}
-	}()
-
-	b, _ := json.Marshal("ok: " + ps.ByName("hash"))
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
-}
-func (g *Gourmet) apiStartDL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
-	go func() {
-
-		fmt.Printf("Want to start %s\n", r.FormValue("hash"))
-		t, succ := g.getTorrent(r.FormValue("hash"))
-		if succ {
-			<-t.GotInfo()
-
-			t.Reopen()
-			t.DownloadAll()
-
-		}
-	}()
-
-	b, _ := json.Marshal("ok: " + ps.ByName("hash"))
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
-}
 func (g *Gourmet) speedCalcDL(v *torrent.Torrent) {
 	var hex string = v.InfoHash().HexString()
 	if _, ok := dlSpeedCalc[hex]; ok {
 		lastSize, lastTime := dlSpeedCalc[hex].lastSize, dlSpeedCalc[hex].lastTime
-
+		lastSpeed := (v.BytesCompleted() - lastSize) / ((time.Now().Unix() - lastTime) + 1)
+		if lastSpeed < 5000 { //do not show network pings
+			lastSpeed = 0
+		}
 		dlSpeedCalc[hex] = speed{
 			lastSize:  v.BytesCompleted(),
 			lastTime:  time.Now().Unix(),
-			lastSpeed: (v.BytesCompleted() - lastSize) / ((time.Now().Unix() - lastTime) + 1),
+			lastSpeed: lastSpeed,
 		}
 	} else {
 		dlSpeedCalc[hex] = speed{
@@ -199,17 +138,24 @@ func (g *Gourmet) speedCalcDL(v *torrent.Torrent) {
 			lastTime:  time.Now().Unix(),
 			lastSpeed: 0,
 		}
+	}
+	totalSpeed["DL"] = 0
+	for _, v := range dlSpeedCalc {
+		totalSpeed["DL"] += v.lastSpeed
 	}
 }
 func (g *Gourmet) speedCalcUL(v *torrent.Torrent) {
 	var hex string = v.InfoHash().HexString()
 	if _, ok := ulSpeedCalc[hex]; ok {
 		lastSize, lastTime := ulSpeedCalc[hex].lastSize, ulSpeedCalc[hex].lastTime
-
+		lastSpeed := (v.Stats().BytesWritten - lastSize) / ((time.Now().Unix() - lastTime) + 1)
+		if lastSpeed < 5000 { //do not show network pings
+			lastSpeed = 0
+		}
 		ulSpeedCalc[hex] = speed{
 			lastSize:  v.Stats().BytesWritten,
 			lastTime:  time.Now().Unix(),
-			lastSpeed: (v.Stats().BytesWritten - lastSize) / ((time.Now().Unix() - lastTime) + 1),
+			lastSpeed: lastSpeed,
 		}
 	} else {
 		ulSpeedCalc[hex] = speed{
@@ -218,35 +164,16 @@ func (g *Gourmet) speedCalcUL(v *torrent.Torrent) {
 			lastSpeed: 0,
 		}
 	}
-}
-func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	//	list := g.fakeList(1000)
-	data := []GEntry{}
-	//data := g.fakeList(50000)
-	for _, v := range g.Client.Torrents() {
-		var hex string = v.InfoHash().HexString()
-		g.speedCalcDL(v)
-		g.speedCalcUL(v)
-		data = append(data, GEntry{
-			Name:     v.Name(),
-			Hash:     v.InfoHash().HexString(),
-			Size:     v.Length(),
-			Done:     v.BytesCompleted(),
-			Peers:    v.Stats().TotalPeers,
-			Seeds:    v.Stats().ActivePeers,
-			Uploaded: v.Stats().BytesWritten,
-			UL:       ulSpeedCalc[hex].lastSpeed,
-			DL:       dlSpeedCalc[hex].lastSpeed,
-		})
+	totalSpeed["UL"] = 0
+	for _, v := range ulSpeedCalc {
+		totalSpeed["UL"] += v.lastSpeed
 	}
-	b, _ := json.Marshal(data)
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
 }
+
 func main() {
 	ulSpeedCalc = map[string]speed{}
 	dlSpeedCalc = map[string]speed{}
+	totalSpeed = make(map[string]int64)
 	gourmet := Gourmet{}
 	text, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
@@ -257,7 +184,7 @@ func main() {
 	upLimit := gourmet.Config["UL"].(int)
 	downLimit := gourmet.Config["DL"].(int)
 	gourmet.ClientConfig = &torrent.Config{}
-
+	gourmet.ClientConfig.Seed = true
 	if upLimit > 0 {
 		gourmet.ClientConfig.UploadRateLimiter = rate.NewLimiter(rate.Limit(upLimit), upLimit*2)
 	}
@@ -267,12 +194,23 @@ func main() {
 	gourmet.ClientConfig.Seed = true
 	rand.Seed(time.Now().UnixNano())
 	gourmet.ClientConfig.ListenAddr = fmt.Sprintf(":%d", rand.Intn(65530)+1)
+
 	gourmet.Client, err = torrent.NewClient(gourmet.ClientConfig)
 	if err != nil {
 		panic(err)
 	}
-	gourmet.Client.AddMagnet("magnet:?xt=urn:btih:6REDNTETZGFY7FH2WLNO5QHXS4MBDIQD")
-	gourmet.Client.AddMagnet("magnet:?xt=urn:btih:LEDGO2NZVVBNULSQQYI4GPL4ISALHBL3")
-
-	gourmet.Start()
+	fmt.Printf("Starting listener on port %s\nPeer ID: %x\n", gourmet.ClientConfig.ListenAddr, gourmet.Client.PeerID())
+	trackers := [][]string{
+		{"udp://tracker.opentrackr.org:1337"},
+		{"udp://tracker.coppersurfer.tk:6969"},
+		{"udp://tracker.leechers-paradise.org:6969"},
+		{"udp://zer0day.ch:1337"},
+		{"udp://explodie.org:6969"},
+	}
+	a, _ := gourmet.Client.AddMagnet("magnet:?xt=urn:btih:6REDNTETZGFY7FH2WLNO5QHXS4MBDIQD")
+	a.AddTrackers(trackers)
+	b, _ := gourmet.Client.AddMagnet("magnet:?xt=urn:btih:LEDGO2NZVVBNULSQQYI4GPL4ISALHBL3")
+	b.AddTrackers(trackers)
+	go gourmet.Start()
+	select {}
 }

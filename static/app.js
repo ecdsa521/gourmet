@@ -13,8 +13,17 @@ $("#search").on("input propertychange paste", function() {
 $.ajaxSetup({
     cache: false
 });
+var announce = function(hash) {
+	$.ajax("/api/announce?hash=" + hash);
+}
 
 var loadData = function() {
+	$.ajax("/api/stats").success(function(data) {
+		//alert(data["UL"]);
+		$("#totalUL").html(data["UL"].fileSize(1) + "/s");
+		$("#totalDL").html(data["DL"].fileSize(1) + "/s");
+
+	});
 	if(tTable) {
 		tTable.DataTable().ajax.reload(null, false);
 		return;
@@ -33,7 +42,9 @@ var loadData = function() {
 		data += '<span class="label label-badge label-success">' + row['Seeds'] + ' seeds</span> ';
 		data += '<span class="label label-badge label-primary">' + row['Peers'] + ' peers</span> ';
 		data += '<span class="label label-badge label-warning">' + row['Done'].fileSize(1) + ' done</span> ';
-data += '<span class="label label-badge label-warning">' + row['Uploaded'].fileSize(1) + ' uploaded</span> ';
+		data += '<span class="label label-badge label-warning">' + row['Uploaded'].fileSize(1) + ' uploaded</span> ';
+
+		data += '<span  onclick="announce(\'' + row["Hash"] + '\');" class="btn btn-danger btn-xs glyphicon glyphicon-refresh"></span> ';
 		data += '</div><br style="clear: both;" />';
 
 		data += '<div class="pull-left">';
@@ -48,6 +59,7 @@ data += '<span class="label label-badge label-warning">' + row['Uploaded'].fileS
 		"sAjaxDataProp": "",
 		"sDom": 'lrtip',
 		"select": true,
+		"rowId": 'Hash',
 		"autoWidth": false,
 		"columns.defaultContent": "",
 		"columns": [
@@ -64,7 +76,7 @@ data += '<span class="label label-badge label-warning">' + row['Uploaded'].fileS
 
 
 }
-//setInterval(loadData, 1000);
+setInterval(loadData, 1000);
 var getDetails = function(e) {
 
 	if($(this).hasClass("selected")) {
@@ -104,7 +116,7 @@ $("#tfMagnet").click(function() {
 
 	return false;
 });
-
+$("#tfRefresh").click(loadData);
 //copypaste from http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
  return (a=a?[1e3,'k','B']:[1024,'K','iB'],b=Math,c=b.log,

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"math/rand"
 	"net/http"
 
 	"github.com/anacrolix/torrent"
@@ -46,6 +45,7 @@ func (g *Gourmet) genTemplate(w http.ResponseWriter, r *http.Request, file strin
 		fmt.Sprintf("theme/%s/layout.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/navbar.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/sidebar.html", g.Config["Theme"]),
+		fmt.Sprintf("theme/%s/footer.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/modals.html", g.Config["Theme"]),
 		fmt.Sprintf("theme/%s/%s", g.Config["Theme"], file),
 	}
@@ -66,6 +66,7 @@ func (g *Gourmet) toolbox() []map[string]interface{} {
 		{"Name": "Start", "Icon": "play", "Func": "tfStart"},
 		{"Name": "Stop", "Icon": "stop", "Func": "tfStop"},
 		{"Sep": true},
+		{"Name": "Refresh", "Icon": "refresh", "Func": "tfRefresh"},
 	}
 	return data
 }
@@ -83,7 +84,7 @@ func (g *Gourmet) navbar(active string) []map[string]interface{} {
 
 func (g *Gourmet) footer() map[string]interface{} {
 	return map[string]interface{}{
-		"UL": rand.Intn(2500),
-		"DL": rand.Intn(6500),
+		"UL": totalSpeed["UL"],
+		"DL": totalSpeed["DL"],
 	}
 }
