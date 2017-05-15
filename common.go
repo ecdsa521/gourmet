@@ -59,14 +59,14 @@ func (g *Gourmet) genTemplate(w http.ResponseWriter, r *http.Request, file strin
 func (g *Gourmet) toolbox() []map[string]interface{} {
 
 	data := []map[string]interface{}{
-		{"Name": "Add", "Icon": "plus-sign", "Func": "tfAdd"},
-		{"Name": "Del", "Icon": "minus-sign", "Func": "tfDel"},
-		{"Name": "Magnet", "Icon": "magnet", "Func": "tfMagnet"},
+		{"Name": "Add", "Icon": "plus-sign", "Func": "tfAdd", "Title": "Add torrent"},
+		{"Name": "Del", "Icon": "minus-sign", "Func": "tfDel", "Title": "Remove torrent"},
+		{"Name": "Magnet", "Icon": "magnet", "Func": "tfMagnet", "Title": "Add torrent from URL"},
 		{"Sep": true},
-		{"Name": "Start", "Icon": "play", "Func": "tfStart"},
-		{"Name": "Stop", "Icon": "stop", "Func": "tfStop"},
+		{"Name": "Start", "Icon": "play", "Func": "tfStart", "Title": "Start selected torrents"},
+		{"Name": "Stop", "Icon": "stop", "Func": "tfStop", "Title": "Stop selected torrents"},
 		{"Sep": true},
-		{"Name": "Refresh", "Icon": "refresh", "Func": "tfRefresh"},
+		{"Name": "Refresh", "Icon": "refresh", "Func": "tfRefresh", "Title": "Reload data"},
 	}
 	return data
 }
