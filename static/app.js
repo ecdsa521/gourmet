@@ -35,43 +35,50 @@ var loadData = function() {
 	var nameRender = function(data, type, row, meta) {
 		percent = Math.round((row['Done'] * 100) / row['Size']);
 		//console.log(row["Activity"]);
-		var data = row['Name'];
 
-		data += '<div class="pull-right clear">';
+		const template = ({status, color, percent, dl, ul, name}) => `
+		${name}
+		<div class="pull-right clear">
+			<div class="progress progress-badge label-badge pull-right">
+				<span class="label progress-center">${status} (${percent}%)</span>
+				<div role="progressbar" class="progress-bar progress-bar-${color} progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" style="width:${percent}%"></div>
+			</div>
+			<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-download"></span> ${dl}/s</span>
+			<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-upload"></span> ${ul}/s</span>
+
+		</div>`;
+		var data = {
+			"percent": percent,
+			"ul": row['UL'].fileSize(1),
+			"dl": row['DL'].fileSize(1),
+			"name": row["Name"],
+		}
 
 		switch (row['Status']) {
 			case "Seeding":
-			data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Seeding: ' + row['Uploaded'].fileSize(1) + '</span><div role="progressbar" class="progress-bar progress-bar-success progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				data["status"] = row['Uploaded'].fileSize(1);
+				data["color"] = "success";
 				break
 			case "Downloading":
-				//data += '<span class="label label-badge label-primary">Downloading: ' + percent + '%</span> ';
-				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Downloading: ' + row['Done'].fileSize(1) + ' (' + percent + '%)</span><div role="progressbar" class="progress-bar progress-bar-primary progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				data["status"] = row['Done'].fileSize(1);
+				data["color"] = "primary";
 				break
 			case "Stopped":
-				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Stopped: ' + row['Done'].fileSize(1) + ' (' + percent + '%)</span><div role="progressbar" class="progress-bar progress-bar-warning progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
-
-				//data += '<span class="label label-badge label-warning">Stopped</span> ';
+				data["status"] = row['Done'].fileSize(1);
+				data["color"] = "warning";
 				break
 			case "Error":
-				data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">Error</span><div role="progressbar" class="progress-bar progress-bar-danger progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				data["status"] = "Error";
+				data["color"] = "danger";
 				break
 			default:
-			data += '<div class="progress progress-badge label-badge pull-right"><span class="label  progress-center">' + row["Status"] + '</span><div role="progressbar" class="progress-bar progress-bar-danger progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + percent + '" style="width:' + percent + '%"></div></div>';
+				data["status"] = row['Status'];
+				data["color"] = "warning";
 		}
-		data += '<span class=" label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-upload"></span> ' + row['UL'].fileSize(1) + '/s</span> ';
-		data += '<span class=" label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-download"></span> ' + row['DL'].fileSize(1) + '/s</span> ';
-
-		data += '<br style="clear: both;" />';
-		data += "</div>";
 
 
 
-		//data += '<span  onclick="announce(\'' + row["Hash"] + '\');" class="btn btn-danger btn-xs glyphicon glyphicon-refresh"></span> ';
-
-
-		data += '</div>';
-
-		return data;
+		return [data].map(template).join("");
 
 	}
 	tTable = $('#list').dataTable( {
