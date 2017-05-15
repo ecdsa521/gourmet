@@ -202,7 +202,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Starting listener on port %s\nPeer ID: %x\n", gourmet.ClientConfig.ListenAddr, gourmet.Client.PeerID())
-	trackers := [][]string{
+	/*trackers := [][]string{
 		{"udp://tracker.opentrackr.org:1337"},
 		{"udp://tracker.coppersurfer.tk:6969"},
 		{"udp://tracker.leechers-paradise.org:6969"},
@@ -213,6 +213,7 @@ func main() {
 	a.AddTrackers(trackers)
 	b, _ := gourmet.Client.AddMagnet("magnet:?xt=urn:btih:LEDGO2NZVVBNULSQQYI4GPL4ISALHBL3")
 	b.AddTrackers(trackers)
+	*/
 	go gourmet.Start()
 	select {}
 }
