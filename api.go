@@ -34,7 +34,9 @@ func (g *Gourmet) apiStats(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	stats["Peers"] = totalPeers
 	stats["Seeds"] = totalSeeds
+
 	stats["Trackers"] = g.getAllTrackers()
+	stats["TrackersNo"] = len(g.getAllTrackers())
 	b, _ := json.Marshal(stats)
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(b)

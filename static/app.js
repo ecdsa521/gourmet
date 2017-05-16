@@ -22,7 +22,9 @@ var loadData = function() {
 		//alert(data["UL"]);
 		$("#totalUL").html(data["UL"].fileSize(1) + "/s");
 		$("#totalDL").html(data["DL"].fileSize(1) + "/s");
-
+		$("#totalPeers").html(data["Peers"]);
+		$("#totalSeeds").html(data["Seeds"]);
+		$("#totalTrackers").html(data["TrackersNo"]);
 	});
 	if(tTable) {
 		tTable.DataTable().ajax.reload(null, false);
@@ -36,11 +38,11 @@ var loadData = function() {
 		percent = Math.round((row['Done'] * 100) / row['Size']);
 		//console.log(row["Activity"]);
 
-		const template = ({status, color, percent, dl, ul, name}) => `
+		const template = ({icon, status, color, percent, dl, ul, name}) => `
 		${name}
 		<div class="pull-right clear">
 			<div class="progress progress-badge label-badge pull-right">
-				<span class="label progress-center">${status} (${percent}%)</span>
+				<span class="label progress-center"><span class="${icon}"></span> ${status} (${percent}%)</span>
 				<div role="progressbar" class="progress-bar progress-bar-${color} progress-bar-bg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" style="width:${percent}%"></div>
 			</div>
 			<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-download"></span> ${dl}/s</span>
@@ -58,18 +60,22 @@ var loadData = function() {
 			case "Seeding":
 				data["status"] = row['Uploaded'].fileSize(1);
 				data["color"] = "success";
+				data["icon"] = "glyphicon glyphicon-leaf";
 				break
 			case "Downloading":
 				data["status"] = row['Done'].fileSize(1);
 				data["color"] = "primary";
+				data["icon"] = "glyphicon glyphicon-flash";
 				break
 			case "Stopped":
 				data["status"] = row['Done'].fileSize(1);
 				data["color"] = "warning";
+				data["icon"] = "glyphicon glyphicon-off";
 				break
 			case "Error":
 				data["status"] = "Error";
 				data["color"] = "danger";
+				data["icon"] = "glyphicon glyphicon-warning-icon";
 				break
 			default:
 				data["status"] = row['Status'];
