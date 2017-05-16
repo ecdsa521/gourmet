@@ -32,6 +32,10 @@ var loadData = function() {
 		//console.log(row["Activity"]);
 
 		const template = ({icon, state, status, color, percent, dl, ul, name, trackers}) => `
+
+		<span class="unset-icon glyphicon glyphicon-unchecked"></span>
+		<span class="set-icon glyphicon glyphicon-expand"></span>
+
 		${name}
 		<div class="hidden">
 			${trackers}
