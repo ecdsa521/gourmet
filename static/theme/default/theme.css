@@ -198,3 +198,9 @@ tr.selected .unset-icon {
 td {
 	padding-right: 0px !important;
 }
+#statesList li, #trackerList li {
+	cursor: pointer;
+}
+#statesList li:hover, #trackerList li:hover {
+	background: #eee;
+}

@@ -130,7 +130,7 @@ var loadStats = function() {
 		var statesListData = "";
 
 		const labelTpl = ({label, count}) => `
-			<li class="list-group-item">${label} <span class="badge pull-right">${count}</span></li>
+			<li class="list-group-item" onclick="applyFilter('${label}');">${label} <span class="badge pull-right">${count}</span></li>
 		`;
 
 		for(i in data["TrackersMap"]) {
@@ -143,6 +143,14 @@ var loadStats = function() {
 		$("#statesList").html(statesListData);
 	});
 
+}
+
+var applyFilter = function(data) {
+	$("#search").val($("#search").val() + " " + data);
+	if(tTable) {
+		tTable.fnFilter( $("#search").val() );
+		tTable.fnDraw();
+	}
 }
 setInterval(loadData, 1000);
 setInterval(loadStats, 1000);
@@ -158,6 +166,13 @@ var getDetails = function(e) {
 	}
 
 
+}
+var resetFilters = function() {
+	$("#search").val("");
+	if(tTable) {
+		tTable.fnFilter("");
+		tTable.fnDraw();
+	}
 }
 
 $("#tfStart").click(function() {
