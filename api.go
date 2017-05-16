@@ -37,7 +37,9 @@ func (g *Gourmet) apiStats(w http.ResponseWriter, r *http.Request, ps httprouter
 	stats["Seeds"] = totalSeeds
 
 	stats["Trackers"] = g.getAllTrackers()
+	stats["TrackersMap"] = g.getAllTrackersMap()
 	stats["TrackersNo"] = len(g.getAllTrackers())
+	stats["States"] = g.getAllStates()
 	b, _ := json.Marshal(stats)
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(b)
@@ -197,6 +199,32 @@ func (g *Gourmet) getTrackers(t *torrent.Torrent) []string {
 	}
 	sort.Strings(ret)
 	return ret
+}
+func (g *Gourmet) getAllTrackersMap() map[string]int {
+	data := make(map[string]int)
+
+	for _, v := range g.Client.Torrents() {
+
+		for _, val := range reflect.ValueOf(v.Metainfo().AnnounceList.DistinctValues()).MapKeys() {
+			data[val.String()]++
+		}
+
+	}
+
+	return data
+}
+func (g *Gourmet) getAllStates() map[string]int {
+
+	data := make(map[string]int)
+	data["Stopped"] = 0
+	data["Downloading"] = 0
+	data["Seeding"] = 0
+
+	for _, v := range g.Client.Torrents() {
+		data[v.Status]++
+	}
+
+	return data
 }
 
 func (g *Gourmet) getAllTrackers() []string {

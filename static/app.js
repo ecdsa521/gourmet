@@ -18,14 +18,7 @@ var announce = function(hash) {
 }
 
 var loadData = function() {
-	$.ajax("/api/stats").success(function(data) {
-		//alert(data["UL"]);
-		$("#totalUL").html(data["UL"].fileSize(1) + "/s");
-		$("#totalDL").html(data["DL"].fileSize(1) + "/s");
-		$("#totalPeers").html(data["Peers"]);
-		$("#totalSeeds").html(data["Seeds"]);
-		$("#totalTrackers").html(data["TrackersNo"]);
-	});
+
 	if(tTable) {
 		tTable.DataTable().ajax.reload(null, false);
 		return;
@@ -38,8 +31,12 @@ var loadData = function() {
 		percent = Math.round((row['Done'] * 100) / row['Size']);
 		//console.log(row["Activity"]);
 
-		const template = ({icon, status, color, percent, dl, ul, name}) => `
+		const template = ({icon, state, status, color, percent, dl, ul, name, trackers}) => `
 		${name}
+		<div class="hidden">
+			${trackers}
+			${state}
+		</div>
 		<div class="pull-right clear">
 			<div class="progress progress-badge label-badge pull-right">
 				<span class="label progress-center"><span class="${icon}"></span> ${status} (${percent}%)</span>
@@ -49,11 +46,17 @@ var loadData = function() {
 			<span class="label label-badge label-default label-silver"><span class="glyphicon glyphicon-cloud-upload"></span> ${ul}/s</span>
 
 		</div>`;
+		var trackerList = "";
+		for(i in row["Trackers"]) {
+			trackerList += row["Trackers"][i];
+		}
 		var data = {
 			"percent": percent,
+			"trackers": trackerList,
 			"ul": row['UL'].fileSize(1),
 			"dl": row['DL'].fileSize(1),
 			"name": row["Name"],
+			"state": row["Status"]
 		}
 
 		switch (row['Status']) {
@@ -109,7 +112,36 @@ var loadData = function() {
 
 
 }
+
+var loadStats = function() {
+	$.ajax("/api/stats").success(function(data) {
+		//alert(data["UL"]);
+		$("#totalUL").html(data["UL"].fileSize(1) + "/s");
+		$("#totalDL").html(data["DL"].fileSize(1) + "/s");
+		$("#totalPeers").html(data["Peers"]);
+		$("#totalSeeds").html(data["Seeds"]);
+		$("#totalTrackers").html(data["TrackersNo"]);
+
+		var trackerListData = "";
+		var statesListData = "";
+
+		const labelTpl = ({label, count}) => `
+			<li class="list-group-item">${label} <span class="badge pull-right">${count}</span></li>
+		`;
+
+		for(i in data["TrackersMap"]) {
+			trackerListData += [{count: data["TrackersMap"][i], label: i }].map(labelTpl).join("");
+		}
+		for(i in data["States"]) {
+			statesListData += [{count: data["States"][i], label: i}].map(labelTpl).join("");
+		}
+		$("#trackerList").html(trackerListData);
+		$("#statesList").html(statesListData);
+	});
+
+}
 setInterval(loadData, 1000);
+setInterval(loadStats, 1000);
 var getDetails = function(e) {
 
 	if($(this).hasClass("selected")) {

@@ -214,7 +214,11 @@ func main() {
 	a.AddTrackers(trackers)
 	b, _ := gourmet.Client.AddMagnet("magnet:?xt=urn:btih:LEDGO2NZVVBNULSQQYI4GPL4ISALHBL3")
 	b.AddTrackers(trackers)
-
+	b.AddTrackers([][]string{{
+		"udp://test.tracker.please.ignore",
+	}})
+	a.SetStatus("Seeding")
+	b.SetStatus("Seeding")
 	go gourmet.Start()
 	select {}
 }
