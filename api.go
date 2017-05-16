@@ -114,7 +114,7 @@ func (g *Gourmet) apiStartDL(w http.ResponseWriter, r *http.Request, ps httprout
 
 func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
-	g.getAllTrackers()
+
 	//	list := g.fakeList(1000)
 	data := []GEntry{}
 	//data := g.fakeList(5000)
@@ -143,7 +143,7 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 				Peers:    v.Stats().TotalPeers,
 				Seeds:    v.Stats().ActivePeers,
 				Uploaded: v.Stats().BytesWritten,
-				Trackers: v.Metainfo().AnnounceList,
+				Trackers: g.getTrackers(v),
 				Status:   v.Status,
 				Activity: v.Activity(),
 				UL:       ulSpeedCalc[hex].lastSpeed,

@@ -41,7 +41,7 @@ type GEntry struct {
 	Activity map[string]bool
 	Files    []*torrent.File
 	PeerList []*torrent.Peer
-	Trackers [][]string
+	Trackers []string
 }
 
 type speed struct {
