@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sort"
 
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/ecdsa521/torrent"
@@ -183,6 +184,20 @@ func (g *Gourmet) getTorrent(hash string) (*torrent.Torrent, bool) {
 	return g.Client.Torrent(ih)
 
 }
+func (g *Gourmet) getTrackers(t *torrent.Torrent) []string {
+	ret := []string{}
+	data := make(map[string]bool)
+
+	for _, val := range reflect.ValueOf(t.Metainfo().AnnounceList.DistinctValues()).MapKeys() {
+		data[val.String()] = true
+	}
+
+	for _, v := range reflect.ValueOf(data).MapKeys() {
+		ret = append(ret, v.String())
+	}
+	sort.Strings(ret)
+	return ret
+}
 
 func (g *Gourmet) getAllTrackers() []string {
 	ret := []string{}
@@ -197,5 +212,6 @@ func (g *Gourmet) getAllTrackers() []string {
 	for _, v := range reflect.ValueOf(data).MapKeys() {
 		ret = append(ret, v.String())
 	}
+	sort.Strings(ret)
 	return ret
 }
