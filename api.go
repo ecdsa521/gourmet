@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/ecdsa521/torrent"
@@ -21,17 +22,19 @@ func (g *Gourmet) apiDetails(w http.ResponseWriter, r *http.Request, ps httprout
 }
 
 func (g *Gourmet) apiStats(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	stats := map[string]int{}
+	stats := make(map[string]interface{})
 	stats["UL"] = int(totalSpeed["UL"])
 	stats["DL"] = int(totalSpeed["DL"])
-	stats["Peers"] = 0
-	stats["Seeds"] = 0
 
+	totalPeers := 0
+	totalSeeds := 0
 	for _, v := range g.Client.Torrents() {
-		stats["Peers"] += v.Stats().TotalPeers
-		stats["Seeds"] += v.Stats().ActivePeers
+		totalPeers += v.Stats().TotalPeers
+		totalSeeds += v.Stats().ActivePeers
 	}
-
+	stats["Peers"] = totalPeers
+	stats["Seeds"] = totalSeeds
+	stats["Trackers"] = g.getAllTrackers()
 	b, _ := json.Marshal(stats)
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(b)
@@ -107,11 +110,13 @@ func (g *Gourmet) apiStartDL(w http.ResponseWriter, r *http.Request, ps httprout
 }
 
 func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	r.ParseForm()
+	g.getAllTrackers()
 	//	list := g.fakeList(1000)
 	data := []GEntry{}
 	//data := g.fakeList(5000)
 	for _, v := range g.Client.Torrents() {
+
 		var hex string = v.InfoHash().HexString()
 		g.speedCalcDL(v)
 		g.speedCalcUL(v)
@@ -175,4 +180,20 @@ func (g *Gourmet) getTorrent(hash string) (*torrent.Torrent, bool) {
 
 	return g.Client.Torrent(ih)
 
+}
+
+func (g *Gourmet) getAllTrackers() []string {
+	ret := []string{}
+	data := make(map[string]bool)
+	for _, v := range g.Client.Torrents() {
+
+		for _, val := range reflect.ValueOf(v.Metainfo().AnnounceList.DistinctValues()).MapKeys() {
+			data[val.String()] = true
+		}
+
+	}
+	for _, v := range reflect.ValueOf(data).MapKeys() {
+		ret = append(ret, v.String())
+	}
+	return ret
 }
