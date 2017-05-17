@@ -31,7 +31,7 @@ var loadData = function() {
 		percent = Math.round((row['Done'] * 100) / row['Size']);
 		//console.log(row["Activity"]);
 
-		const template = ({icon, state, status, color, percent, dl, ul, name, trackers}) => `
+		const template = ({label, icon, state, status, color, percent, dl, ul, name, trackers}) => `
 
 		<span class="unset-icon glyphicon glyphicon-unchecked"></span>
 		<span class="set-icon glyphicon glyphicon-expand"></span>
@@ -40,6 +40,7 @@ var loadData = function() {
 		<div class="hidden">
 			${trackers}
 			${state}
+			${label}
 		</div>
 		<div class="pull-right clear">
 			<div class="progress progress-badge label-badge pull-right">
@@ -52,7 +53,11 @@ var loadData = function() {
 		</div>`;
 		var trackerList = "";
 		for(i in row["Trackers"]) {
-			trackerList += row["Trackers"][i];
+			trackerList += "tracker:" + row["Trackers"][i];
+		}
+		var labelList = "";
+		for(i in row["Label"]) {
+			labelList += "label:" + row["Label"][i];
 		}
 		var data = {
 			"percent": percent,
@@ -60,7 +65,8 @@ var loadData = function() {
 			"ul": row['UL'].fileSize(1),
 			"dl": row['DL'].fileSize(1),
 			"name": row["Name"],
-			"state": row["Status"]
+			"state": "state:" + row["Status"],
+			"label": labelList,
 		}
 
 		switch (row['Status']) {
@@ -128,23 +134,37 @@ var loadStats = function() {
 
 		var trackerListData = "";
 		var statesListData = "";
+		var labelsListData = "";
+		var labelsCheckbox = "";
 
-		const labelTpl = ({label, count}) => `
-			<li class="list-group-item" onclick="applyFilter('${label}');">${label} <span class="badge pull-right">${count}</span></li>
+		const labelTpl = ({badge, label, count}) => `
+			<li class="list-group-item s-list" onclick="applyFilter('${badge}:${label}');">${label} <span class="badge pull-right">${count}</span></li>
 		`;
-
+		const checkTpl = ({label, count}) => `
+			<li class="list-group-item s-list" onclick="applyLabel('${label}');">${label} <span class="badge pull-right">${count}</span></li>
+		`;
 		for(i in data["TrackersMap"]) {
-			trackerListData += [{count: data["TrackersMap"][i], label: i }].map(labelTpl).join("");
+			trackerListData += [{count: data["TrackersMap"][i], label: i, badge: "tracker" }].map(labelTpl).join("");
 		}
 		for(i in data["States"]) {
-			statesListData += [{count: data["States"][i], label: i}].map(labelTpl).join("");
+			statesListData += [{count: data["States"][i], label: i, badge: "state"}].map(labelTpl).join("");
 		}
+		for(i in data["Labels"]) {
+			labelsListData += [{count: data["Labels"][i], label: i, badge: "label"}].map(labelTpl).join("");
+			labelsCheckbox += [{count: data["Labels"][i], label: i, badge: "label"}].map(checkTpl).join("");
+		}
+
 		$("#trackerList").html(trackerListData);
 		$("#statesList").html(statesListData);
+		$("#labelsList").html(labelsListData);
+		$("#curLabels").html(labelsCheckbox);
 	});
 
 }
+var applyLabel = function(data) {
+	$("#newLabel").val(data);
 
+}
 var applyFilter = function(data) {
 	$("#search").val($("#search").val() + " " + data);
 	if(tTable) {
@@ -218,6 +238,25 @@ $("#tfMagnet").click(function() {
 
 	return false;
 });
+
+$("#tfLabel").click(function() {
+
+	var data = tTable.DataTable().rows( { selected: true } ).data();
+	var hlist = "";
+	$("#form-label-hash").html("");
+	$(data).each(function(x) {
+		hlist += '<input type="hidden" name="hash" value="' + data[x]["Hash"] + '">';
+	})
+	$("#form-label-hash").html(hlist);
+	$("#modalLabel").modal();
+	$("#modalLabel .submit").click(function() {
+		$("#modalLabel form").submit();
+		$("#modalLabel").modal('hide');
+	});
+
+	return false;
+});
+
 $("#tfRefresh").click(loadData);
 //copypaste from http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){

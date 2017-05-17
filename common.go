@@ -66,6 +66,7 @@ func (g *Gourmet) toolbox() []map[string]interface{} {
 		{"Name": "Start", "Icon": "play", "Func": "tfStart", "Title": "Start selected torrents"},
 		{"Name": "Stop", "Icon": "stop", "Func": "tfStop", "Title": "Stop selected torrents"},
 		{"Sep": true},
+		{"Name": "Label", "Icon": "pencil", "Func": "tfLabel", "Title": "Edit labels"},
 		{"Name": "Refresh", "Icon": "refresh", "Func": "tfRefresh", "Title": "Reload data"},
 	}
 	return data

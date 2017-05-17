@@ -39,6 +39,7 @@ type GEntry struct {
 	Uploaded int64
 	Status   string
 	Activity map[string]bool
+	Label    []string
 	Files    []*torrent.File
 	PeerList []*torrent.Peer
 	Trackers []string
@@ -93,6 +94,7 @@ func (g *Gourmet) Start() {
 	g.router.GET("/api/start", g.apiStartDL)
 	g.router.GET("/api/stop", g.apiStopDL)
 	g.router.GET("/api/remove", g.apiRemove)
+	g.router.GET("/api/label", g.apiLabel)
 	g.router.GET("/api/stats", g.apiStats)
 	g.router.GET("/api/announce", g.apiAnnounce)
 	g.router.GET("/api/add/magnet", g.apiAddMagnet)

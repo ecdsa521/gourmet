@@ -40,6 +40,7 @@ func (g *Gourmet) apiStats(w http.ResponseWriter, r *http.Request, ps httprouter
 	stats["TrackersMap"] = g.getAllTrackersMap()
 	stats["TrackersNo"] = len(g.getAllTrackers())
 	stats["States"] = g.getAllStates()
+	stats["Labels"] = g.getAllLabels()
 	b, _ := json.Marshal(stats)
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(b)
@@ -114,6 +115,42 @@ func (g *Gourmet) apiStartDL(w http.ResponseWriter, r *http.Request, ps httprout
 	w.Write(b)
 }
 
+func (g *Gourmet) apiLabel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	go func() {
+		allHashes := []string{}
+		for key, val := range r.Form {
+			for _, v := range val {
+				if key == "hash" {
+					allHashes = append(allHashes, v)
+				}
+			}
+		}
+		for _, hash := range allHashes {
+			fmt.Printf("Want to label %s\n", hash)
+			t, succ := g.getTorrent(hash)
+			if succ {
+				<-t.GotInfo()
+				for key, val := range r.Form {
+					for _, v := range val {
+						if key == "add" {
+							t.AddLabel(v)
+						}
+						if key == "del" {
+							t.DelLabel(v)
+						}
+					}
+
+				}
+			}
+		}
+	}()
+
+	b, _ := json.Marshal("ok: " + ps.ByName("hash"))
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(b)
+}
+
 func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 
@@ -150,6 +187,7 @@ func (g *Gourmet) apiList(w http.ResponseWriter, r *http.Request, ps httprouter.
 				Activity: v.Activity(),
 				UL:       ulSpeedCalc[hex].lastSpeed,
 				DL:       dlSpeedCalc[hex].lastSpeed,
+				Label:    v.GetLabel(),
 			})
 		}
 
@@ -207,6 +245,19 @@ func (g *Gourmet) getAllTrackersMap() map[string]int {
 
 		for _, val := range reflect.ValueOf(v.Metainfo().AnnounceList.DistinctValues()).MapKeys() {
 			data[val.String()]++
+		}
+
+	}
+
+	return data
+}
+func (g *Gourmet) getAllLabels() map[string]int {
+
+	data := make(map[string]int)
+
+	for _, v := range g.Client.Torrents() {
+		for _, label := range v.GetLabel() {
+			data[label]++
 		}
 
 	}

@@ -57,4 +57,34 @@
 </div>
 
 
+<div class="modal fade" id="modalLabel" tabindex="-1" role="dialog" aria-labelledby="modalNewLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modalNewLabel">Edit labels</h4>
+      </div>
+      <div class="modal-body">
+		  <form action="/api/label" target="hidf">
+            <div class="form-group">
+              <label for="newLabel" class="control-label">New label:</label>
+              <input type="text" class="form-control" id="newLabel" name="add">
+            </div>
+			<div id="form-label-hash"></div>
+			<div class="form-group">
+				<label for="labelList" class="control-label">Available labels:</label>
+				<ul class="list-group" id="curLabels"></ul>
+
+			</div>
+
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary submit">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {{ end }}
